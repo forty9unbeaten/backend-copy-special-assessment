@@ -57,10 +57,17 @@ def print_file_paths(file_dict):
 
 def copy_files(paths, dest_dir):
     copied_files = 0
+
     # copy files and attempt to preserve file metadata
     for file in paths:
-        shutil.copy2(file, dest_dir)
-        copied_files += 1
+        try:
+            shutil.copy2(file, dest_dir)
+            copied_files += 1
+        except FileNotFoundError:
+            os.mkdir(dest_dir)
+            shutil.copy2(file, dest_dir)
+            copied_files += 1
+
     print('\n\tFiles Copied:\t{}\n'.format(copied_files))
 
 
