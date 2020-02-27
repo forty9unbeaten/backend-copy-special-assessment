@@ -56,14 +56,22 @@ def print_file_paths(file_dict):
 
 def copy_files(paths, dest_dir):
     copied_files = 0
+    # copy files and attempt to preserve file metadata
     for file in paths:
         shutil.copy2(file, dest_dir)
         copied_files += 1
     print(f'\n\tFiles Copied:\t{copied_files}\n')
 
 
+def zip_files(paths, dest_file):
+    print("\n\tThe command I'm executing:")
+    print(f"\tzip -j {str(dest_file)} {' '.join(paths)}\n")
+    # produce shell command to make/overwrite zip file
+    # containing all special files
+    subprocess.call(['zip', '-j', str(dest_file)] + paths)
+
+
 def main():
-    # This snippet will help you get started with the argparse module.
     parser = argparse.ArgumentParser()
     parser.add_argument('--todir', help='dest dir for special files')
     parser.add_argument('--tozip', help='dest zipfile for special files')
@@ -80,10 +88,11 @@ def main():
 
     if to_dir and to_zip:
         copy_files(file_paths, to_dir)
+        zip_files(file_paths, to_zip)
     elif to_dir:
         copy_files(file_paths, to_dir)
     elif to_zip:
-        pass
+        zip_files(file_paths, to_zip)
     else:
         print_file_paths(file_info)
 
