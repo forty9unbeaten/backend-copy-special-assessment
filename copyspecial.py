@@ -31,7 +31,8 @@ def get_special_files(folder):
             if re.search(reg_exp, file):
                 if file in file_names:
                     raise Exception(
-                        f'\n\n\tError: Two files found with same filename:\t{file}\n')
+                        ('\n\n\tError: Two files found' +
+                         'with same filename:{}\t\n'.format(file)))
                 else:
                     file_names.append(file)
                     path = os.path.abspath(file)
@@ -49,9 +50,9 @@ def print_file_paths(file_dict):
     for file in file_paths:
         print('\n\tSpecial File Found!')
         print('\t-------------------')
-        print(f'\tPath:\t{file}')
-    print(f'\n\tFiles Found: {files_found}')
-    print(f'\tFiles Searched: {files_searched}\n')
+        print('\tPath:\t{}'.format(file))
+    print('\n\tFiles Found: {}'.format(files_found))
+    print('\tFiles Searched: {}\n'.format(files_searched))
 
 
 def copy_files(paths, dest_dir):
@@ -60,12 +61,12 @@ def copy_files(paths, dest_dir):
     for file in paths:
         shutil.copy2(file, dest_dir)
         copied_files += 1
-    print(f'\n\tFiles Copied:\t{copied_files}\n')
+    print('\n\tFiles Copied:\t{}\n'.format(copied_files))
 
 
 def zip_files(paths, dest_file):
     print("\n\tThe command I'm executing:")
-    print(f"\tzip -j {str(dest_file)} {' '.join(paths)}\n")
+    print("\tzip -j {} {}\n".format(dest_file, ' '.join(paths)))
     # produce shell command to make/overwrite zip file
     # containing all special files
     subprocess.call(['zip', '-j', str(dest_file)] + paths)
