@@ -64,7 +64,7 @@ def copy_files(paths, dest_dir):
             shutil.copy2(file, dest_dir)
             copied_files += 1
         except FileNotFoundError:
-            os.mkdir(dest_dir)
+            os.makedirs(os.path.abspath(dest_dir))
             shutil.copy2(file, dest_dir)
             copied_files += 1
 
