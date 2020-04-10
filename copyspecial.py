@@ -15,30 +15,94 @@ import shutil
 import subprocess
 import argparse
 
-# This is to help coaches and graders identify student assignments
-__author__ = "???"
+__author__ = "Rob Spears (GitHub: Forty9Unbeaten)"
 
 
-# +++your code here+++
-# Write functions and modify main() to call them
+def get_special_files(folder):
+    file_dict = {'file_paths': [], 'files_found': 0, 'files_searched': 0}
+    file_names = []
+    reg_exp = r'__\w+__'
+
+    for root, directories, files in os.walk(folder):
+        for file in files:
+            # Search files for 'special files'
+            # and print error if duplicate filenames
+            # are encountered
+            if re.search(reg_exp, file):
+                if file in file_names:
+                    raise Exception(
+                        ('\n\n\tError: Two files found' +
+                         'with same filename:{}\t\n'.format(file)))
+                else:
+                    file_names.append(file)
+                    path = os.path.abspath(file)
+                    file_dict['file_paths'].append(path)
+                    file_dict['files_found'] += 1
+        file_dict['files_searched'] += 1
+    return file_dict
+
+
+def print_file_paths(file_dict):
+    file_paths = file_dict['file_paths']
+    files_found = file_dict['files_found']
+    files_searched = file_dict['files_searched']
+
+    for file in file_paths:
+        print('\n\tSpecial File Found!')
+        print('\t-------------------')
+        print('\tPath:\t{}'.format(file))
+    print('\n\tFiles Found: {}'.format(files_found))
+    print('\tFiles Searched: {}\n'.format(files_searched))
+
+
+def copy_files(paths, dest_dir):
+    copied_files = 0
+
+    # copy files and attempt to preserve file metadata
+    for file in paths:
+        try:
+            shutil.copy2(file, dest_dir)
+            copied_files += 1
+        except FileNotFoundError:
+            os.makedirs(os.path.abspath(dest_dir))
+            shutil.copy2(file, dest_dir)
+            copied_files += 1
+
+    print('\n\tFiles Copied:\t{}\n'.format(copied_files))
+
+
+def zip_files(paths, dest_file):
+    print("\n\tThe command I'm executing:")
+    print("\tzip -j {} {}\n".format(dest_file, ' '.join(paths)))
+    # produce shell command to make/overwrite zip file
+    # containing all special files
+    subprocess.call(['zip', '-j', str(dest_file)] + paths)
+
 
 def main():
-    # This snippet will help you get started with the argparse module.
     parser = argparse.ArgumentParser()
     parser.add_argument('--todir', help='dest dir for special files')
     parser.add_argument('--tozip', help='dest zipfile for special files')
-    # TODO need an argument to pick up 'from_dir'
+    parser.add_argument(
+        'srcdir', help='source dir for special files')
     args = parser.parse_args()
 
-    # TODO you must write your own code to get the cmdline args.
-    # Read the docs and examples for the argparse module about how to do this.
+    src_dir = args.srcdir
+    to_dir = args.todir
+    to_zip = args.tozip
 
-    # Parsing command line arguments is a must-have skill.
-    # This is input data validation.  If something is wrong (or missing) with any
-    # required args, the general rule is to print a usage message and exit(1).
+    file_info = get_special_files(src_dir)
+    file_paths = file_info['file_paths']
 
-    # +++your code here+++
-    # Call your functions
+    if to_dir and to_zip:
+        copy_files(file_paths, to_dir)
+        zip_files(file_paths, to_zip)
+    elif to_dir:
+        copy_files(file_paths, to_dir)
+    elif to_zip:
+        zip_files(file_paths, to_zip)
+    else:
+        print_file_paths(file_info)
 
 
 if __name__ == "__main__":
